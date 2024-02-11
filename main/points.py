@@ -2,7 +2,7 @@ from typing import List
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
-from db import DBPointsPeriod, DBDriver, DBRace
+from main.db import DBPointsPeriod, DBDriver, DBRace
 
 
 def parse_period_table(header_id: str, width: int):
@@ -74,7 +74,6 @@ def get_corresponding_system(driver: DBDriver, points_periods: List[DBPointsPeri
 
 
 class PointsHandler:
-
     def __init__(self):
         self.points_periods = parse_period_table("Points_scoring_systems", 11)
         self.sprint_periods = parse_period_table("Special_cases", 8)
@@ -105,7 +104,9 @@ class PointsHandler:
             # 11 is fastest lap index
             got_fastest = 11 in points_table and race_result.fastest_lap
 
-            if isinstance(race_result.position, int) and race_result.position in points_table:
+            if (isinstance(race_result.position, int)
+                    and race_result.position in points_table
+                    and race_result.counts_for_total):
                 race_result.points += points_table[race_result.position] * races[i].scoring_modifier
 
                 if got_fastest and not points_system.fastest_lap_always:

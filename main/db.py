@@ -19,12 +19,14 @@ class DBRaceResult:
     fastest_lap: bool
     sprint_result: int | None
     points: int
+    counts_for_total: bool
 
     def __init__(self):
         self.pole = False
         self.fastest_lap = False
         self.sprint_result = None
         self.points = 0
+        self.counts_for_total = True
 
 
 @dataclass
