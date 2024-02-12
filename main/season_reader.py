@@ -28,11 +28,16 @@ class SeasonReader:
             cur_element = cur_element.find_next_sibling("table")
         table = cur_element.find("tbody").find("tr").find("td").find("table").find("tbody")
 
-        # get info from races row
+        # iterate over races in first row
         db_races = []
         races = table.find("tr")
-        for race in races.find_all("th")[2:-1]:
-            race_info = list(race.stripped_strings)
+        cur_race = races.find("th").find_next_sibling().find_next_sibling()
+        cur_index = 1
+        while cur_race is not None:
+            if cur_race.find("span") is None:
+                break
+
+            race_info = list(cur_race.stripped_strings)
 
             db_race = DBRace()
             db_races.append(db_race)
@@ -41,6 +46,12 @@ class SeasonReader:
             db_race.year = year
             if len(race_info) > 1:
                 db_race.scoring_modifier = 0.5
+            db_race.flag_link = cur_race.find("span", class_="flagicon").find("span").find("a").find("img").attrs["src"]
+            db_race.index = cur_index
+
+            # set next race
+            cur_race = cur_race.find_next_sibling()
+            cur_index += 1
 
         # iterate over driver rows
         db_drivers = []
@@ -123,8 +134,8 @@ class SeasonReader:
                             cur_race_info.remove("1")
                         if len(cur_race_info) > 0 and cur_race_info[0].isnumeric():
                             db_race_result.sprint_result = int(cur_race_info.pop(0))
-                        if len(cur_race_info) > 0:
-                            print(f"unexpected annotations: {cur_race_info}")
+                        # if len(cur_race_info) > 0:
+                        #     print(f"unexpected annotations: {cur_race_info}")
 
                 # set next race
                 cur_race = cur_race.find_next_sibling("td")
